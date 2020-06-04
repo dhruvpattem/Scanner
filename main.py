@@ -34,7 +34,7 @@ def getApprox(img):
 
         area_ratio = cv2.contourArea(contour) / (img.shape[0] * img.shape[1])
 
-        if len(approx) == 4 and area_ratio > 0.3 and area_ratio < 0.9:
+        if len(approx) == 4 and area_ratio > 0.3 and area_ratio < 0.8:
             print(area_ratio)
 
             return approx, contour
