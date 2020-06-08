@@ -2,16 +2,24 @@ import urllib.request
 from cv2 import cv2
 import numpy as np
 
+ipwebcam = False
+
 # IPv4 url from IP Webcam
-url = "https://192.168.1.140:8080"
+url = "https://192.168._.___:8080"
+
+# Device Webcam
+cap = cv2.VideoCapture(0)
 
 
 def getImage(img_url):
-    img_arr = np.array(
-        bytearray(urllib.request.urlopen(img_url).read()),
-        dtype=np.uint8)
-    img = cv2.imdecode(img_arr, -1)
-    img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
+    if ipwebcam:
+        img_arr = np.array(
+            bytearray(urllib.request.urlopen(img_url).read()),
+            dtype=np.uint8)
+        img = cv2.imdecode(img_arr, -1)
+        img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
+    else:
+        img = cap.read()[1]
 
     return img
 
