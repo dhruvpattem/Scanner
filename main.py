@@ -2,10 +2,12 @@ import urllib.request
 from cv2 import cv2
 import numpy as np
 
+url = "http://192.168.1.140:8080"
 
-def getImage(url):
+
+def getImage(img_url):
     img_arr = np.array(
-        bytearray(urllib.request.urlopen(url).read()),
+        bytearray(urllib.request.urlopen(img_url).read()),
         dtype=np.uint8)
     img = cv2.imdecode(img_arr, -1)
     img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
@@ -47,7 +49,7 @@ def getWarp(img, approx):
 
 
 while True:
-    img = getImage("http://192.168.1.140:8080/shot.jpg")
+    img = getImage(url + "/shot.jpg")
 
     img_edges = getEdges(img)
     img_contours = img.copy()
