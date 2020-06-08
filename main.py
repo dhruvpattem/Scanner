@@ -2,7 +2,8 @@ import urllib.request
 from cv2 import cv2
 import numpy as np
 
-url = "http://192.168.1.140:8080"
+# IPv4 url from IP Webcam
+url = "https://192.168.1.140:8080"
 
 
 def getImage(img_url):
@@ -63,6 +64,7 @@ while True:
         cv2.drawContours(img_contours, approx, -1, (255, 0, 0), 50)
 
     cv2.imshow("Image", img_contours)
+    cv2.imshow("Edged", img_edges)
 
     if contour is not None:
         pass
