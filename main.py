@@ -2,13 +2,13 @@ import urllib.request
 from cv2 import cv2
 import numpy as np
 
-ipwebcam = False
-
 # IPv4 url from IP Webcam
-url = "https://192.168._.___:8080"
+url = "http://192.168._.___:8080"
 
 # Device Webcam
 cap = cv2.VideoCapture(0)
+
+ipwebcam = False if '_' in url else True
 
 
 def getImage(img_url):
@@ -46,15 +46,35 @@ def getApprox(img):
         area_ratio = cv2.contourArea(contour) / (img.shape[0] * img.shape[1])
 
         if len(approx) == 4 and area_ratio > 0.3 and area_ratio < 0.8:
-            print(area_ratio)
 
-            return approx, contour
-
-    return None, None
+            return approx
 
 
 def getWarp(img, approx):
-    pass
+    height = img.shape[0]
+    width = int(height * (210/297))
+    pts1 = np.float32(reorderPoints(approx))
+    pts2 = np.float32([[0, 0], [width, 0], [0, height], [width, height]])
+    matrix = cv2.getPerspectiveTransform(pts1, pts2)
+    img_warped = cv2.warpPerspective(img, matrix, (width, height))
+
+    return img_warped
+
+
+def reorderPoints(pts):
+    pts_reshape = pts.reshape((4, 2))
+    pts_new = np.zeros((4, 1, 2), np.int32)
+
+    add = pts_reshape.sum(1)
+    diff = np.diff(pts_reshape, axis=1)
+
+    pts_new[0] = pts_reshape[np.argmin(add)]
+    pts_new[3] = pts_reshape[np.argmax(add)]
+
+    pts_new[1] = pts_reshape[np.argmin(diff)]
+    pts_new[2] = pts_reshape[np.argmax(diff)]
+
+    return pts_new
 
 
 while True:
@@ -63,19 +83,17 @@ while True:
     img_edges = getEdges(img)
     img_contours = img.copy()
 
-    approx, contour = getApprox(img_edges)
-
-    getWarp(img, approx)
+    approx = getApprox(img_edges)
 
     if approx is not None:
         cv2.drawContours(img_contours, [approx], -1, (0, 255, 0), 10)
         cv2.drawContours(img_contours, approx, -1, (255, 0, 0), 50)
 
+        img_warped = getWarp(img, approx)
+        cv2.imshow("Warped", img_warped)
+
     cv2.imshow("Image", img_contours)
     cv2.imshow("Edged", img_edges)
-
-    if contour is not None:
-        pass
 
     if cv2.waitKey(1) & 0xff == 27:
         break
