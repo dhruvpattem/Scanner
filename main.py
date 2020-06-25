@@ -3,7 +3,7 @@ from cv2 import cv2
 import numpy as np
 
 # IPv4 url from IP Webcam
-url = "http://192.168._.___:8080"
+url = "http://192.168._.__:8080"
 
 # Device Webcam
 cap = cv2.VideoCapture(0)
@@ -61,6 +61,18 @@ def getWarp(img, approx):
     return img_warped
 
 
+def getScan(img_warped):
+    img_gray = cv2.cvtColor(img_warped, cv2.COLOR_BGR2GRAY)
+
+    img_sharp = cv2.GaussianBlur(img_gray, (0, 0), 3)
+    img_sharp = cv2.addWeighted(img_gray, 1.5, img_sharp, -0.5, 0)
+
+    img_scanned = cv2.adaptiveThreshold(
+        img_sharp, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 21, 15)
+
+    return img_scanned
+
+
 def reorderPoints(pts):
     pts_reshape = pts.reshape((4, 2))
     pts_new = np.zeros((4, 1, 2), np.int32)
@@ -85,15 +97,16 @@ while True:
 
     approx = getApprox(img_edges)
 
+    cv2.imshow("Image", img)
+    cv2.imshow("Image2", img_edges)
+
     if approx is not None:
         cv2.drawContours(img_contours, [approx], -1, (0, 255, 0), 10)
         cv2.drawContours(img_contours, approx, -1, (255, 0, 0), 50)
 
         img_warped = getWarp(img, approx)
-        cv2.imshow("Warped", img_warped)
-
-    cv2.imshow("Image", img_contours)
-    cv2.imshow("Edged", img_edges)
+        cv2.imshow("Contours", img_contours)
+        cv2.imshow("Scanned", getScan(img_warped))
 
     if cv2.waitKey(1) & 0xff == 27:
         break
